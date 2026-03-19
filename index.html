@@ -1089,26 +1089,36 @@
             render();
             animationId = requestAnimationFrame(loop);
         }
-
         const portfolioHeader = document.getElementById('portfolio-header');
         function dragStart(e) {
-            isDragging = true; wasDragged = false;
+            isDragging = true;
+            wasDragged = false;
             portfolioHeader.classList.add('smart-hide');
-            grid.classList.add('dragging');
+
             prevMouseX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             prevMouseY = e.type.includes('mouse') ? e.pageY : e.touches[0].clientY;
-            dragStartX = prevMouseX; dragStartY = prevMouseY;
-            velocityX = 0; velocityY = 0;
+            dragStartX = prevMouseX;
+            dragStartY = prevMouseY;
+            velocityX = 0;
+            velocityY = 0;
         }
-
         function drag(e) {
             if (!isDragging) return;
             const x = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             const y = e.type.includes('mouse') ? e.pageY : e.touches[0].clientY;
-            if (Math.hypot(x - dragStartX, y - dragStartY) > 10) wasDragged = true;
-            velocityX = x - prevMouseX; velocityY = y - prevMouseY;
-            prevMouseX = x; prevMouseY = y;
-            targetX += velocityX; targetY += velocityY;
+
+            if (Math.hypot(x - dragStartX, y - dragStartY) > 10) {
+                wasDragged = true;
+                grid.classList.add('dragging'); // Only shield when real movement occurs
+            }
+
+            velocityX = x - prevMouseX;
+            velocityY = y - prevMouseY;
+            prevMouseX = x;
+            prevMouseY = y;
+
+            targetX += velocityX;
+            targetY += velocityY;
         }
 
         function dragEnd() {
