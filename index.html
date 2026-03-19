@@ -314,16 +314,24 @@
         }
 
         @keyframes bgZoomEntrance {
-            from { transform: scale(1.1); filter: brightness(0) blur(10px); }
-            to { transform: scale(1); filter: brightness(0.65) contrast(1.1) blur(0); }
+            from {
+                transform: scale(1.1);
+                filter: brightness(0) blur(10px);
+            }
+
+            to {
+                transform: scale(1);
+                filter: brightness(0.65) contrast(1.1) blur(0);
+            }
         }
 
         @keyframes contentLift {
-            from { 
+            from {
                 opacity: 0;
                 transform: translateY(40px) scale(0.98);
             }
-            to { 
+
+            to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
@@ -842,11 +850,11 @@
             </button>
         </div>
         <div class="nav-center">
-            <div class="port-brand">i.am.kakape</div>
+            <div class="port-brand">Kojo Kwarteng</div>
         </div>
         <div class="nav-right">
             <!-- Instagram -->
-            <a href="https://www.instagram.com/i.am.kakape/" class="social-link" aria-label="Instagram">
+            <a href="https://www.instagram.com/kojokwarteng_/" class="social-link" aria-label="Instagram">
                 <svg viewBox="0 0 24 24">
                     <path
                         d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -860,7 +868,7 @@
                 </svg>
             </a>
             <!-- WhatsApp -->
-            <a href="https://wa.me/233234567890" class="social-link" aria-label="WhatsApp">
+            <a href="https://api.whatsapp.com/send?phone=233245667769" class="social-link" aria-label="WhatsApp">
                 <svg viewBox="0 0 24 24">
                     <path
                         d="M11.996 0A12 12 0 000 12c0 2.09.52 4.05 1.44 5.75L0 24l6.4-1.39A11.96 11.96 0 0011.996 24C18.625 24 24 18.625 24 12S18.625 0 11.996 0zM12 21.96c-1.63 0-3.17-.42-4.52-1.16l-.32-.18-3.38.74.75-3.34-.2-.33A9.97 9.97 0 012.04 12C2.04 6.5 6.51 2.04 12 2.04S21.96 6.5 21.96 12 17.5 21.96 12 21.96zm5.55-7.53c-.3-.15-1.8-.89-2.07-1-.28-.1-.49-.15-.69.15-.2.3-.78 1-.95 1.2-.18.2-.35.23-.65.08A8.2 8.2 0 0110.8 12.5a9.05 9.05 0 01-1.63-2.03c-.18-.3.02-.45.17-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53h-.6c-.2 0-.52.07-.8.37s-1.04 1.02-1.04 2.48c0 1.47 1.07 2.89 1.21 3.09.15.2 2.08 3.25 5.1 4.54.72.3 1.28.48 1.72.62.72.23 1.38.2 1.9.12.58-.09 1.8-.73 2.05-1.44.25-.7.25-1.3.18-1.43-.08-.13-.28-.2-.58-.35z" />
@@ -873,7 +881,7 @@
     <div class="hero-overlay" id="hero-overlay">
         <img class="hero-bg" src="/i.am.kakpe/image.jpg" alt="Photographer Background">
         <main class="hero-center">
-            <h1 class="hero-title">i.am.kakape</h1>
+            <h1 class="hero-title">Kojo Kwarteng</h1>
         </main>
 
         <footer class="hero-footer-split">
@@ -962,33 +970,33 @@
         const itemH = itemActualH + gap;
 
         // Buffer zones: 14x12 grid instead of 12x10
-        const cols = 14; 
-        const rows = 12; 
+        const cols = 14;
+        const rows = 12;
         const totalW = cols * itemW;
         const totalH = rows * itemH;
 
         // Using pre-computed imageSources (same as before)
         const imageSources = [
-            { src: './i.am.kakpe/485492466_17925309888025731_7626418343488923576_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/486655536_18492561112006462_5981196424839271321_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/491461718_17927838315025731_6073027245294905678_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/491464833_17930133522025731_5717421072113813218_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/544112729_17944078593025731_1577401041159391254_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/547942206_17944375704025731_924546056585511851_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/563603449_17947642101025731_8240427030025265659_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/568021435_17948316738025731_14891363825318792_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/571928297_17949224442025731_4615989955436880727_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/573624568_17950409133025731_7709427011070255576_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/581689614_17951088090025731_3893918756976328602_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/586396316_17951765907025731_3082191570876175228_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/588242088_17952482418025731_9020525219639298917_n (1).jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/589907324_17953197831025731_1048182770484030898_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/613087115_17956955853025731_7176167438606832514_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/633018569_17960716107025731_643253903948355596_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/639600504_17961398136025731_5380457280195206564_n.jpeg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/639820016_17961398052025731_6952355782499714920_n.jpg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/639885522_17961398118025731_8162838456740941080_n.jpeg', name: 'i.am.kakape' },
-            { src: './i.am.kakpe/642751844_18510753667072578_5985830290176820310_n.jpg', name: 'i.am.kakape' }
+            { src: './i.am.kakpe/485492466_17925309888025731_7626418343488923576_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/486655536_18492561112006462_5981196424839271321_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/491461718_17927838315025731_6073027245294905678_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/491464833_17930133522025731_5717421072113813218_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/544112729_17944078593025731_1577401041159391254_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/547942206_17944375704025731_924546056585511851_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/563603449_17947642101025731_8240427030025265659_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/568021435_17948316738025731_14891363825318792_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/571928297_17949224442025731_4615989955436880727_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/573624568_17950409133025731_7709427011070255576_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/581689614_17951088090025731_3893918756976328602_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/586396316_17951765907025731_3082191570876175228_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/588242088_17952482418025731_9020525219639298917_n (1).jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/589907324_17953197831025731_1048182770484030898_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/613087115_17956955853025731_7176167438606832514_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/633018569_17960716107025731_643253903948355596_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/639600504_17961398136025731_5380457280195206564_n.jpeg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/639820016_17961398052025731_6952355782499714920_n.jpg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/639885522_17961398118025731_8162838456740941080_n.jpeg', name: 'Kojo Kwarteng' },
+            { src: './i.am.kakpe/642751844_18510753667072578_5985830290176820310_n.jpg', name: 'Kojo Kwarteng' }
         ];
 
         const items = [];
@@ -1058,7 +1066,7 @@
             items.forEach(item => {
                 const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
                 const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
-                
+
                 if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
                     item.el.style.visibility = 'hidden';
                 } else {
