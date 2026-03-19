@@ -76,16 +76,20 @@
         }
 
         /* ── GRID ENTRANCE ── */
-        .grid-item {
+        .gallery-item {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
-            transition: opacity 1.2s cubic-bezier(0.165, 0.84, 0.44, 1), transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: opacity 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        .grid-item.revealed {
+        .gallery-item.revealed {
             opacity: 1;
-            transform: translateY(0) scale(1);
         }
+
+        .grid.dragging .gallery-item {
+            pointer-events: none;
+        }
+
+
 
         /* ── GLOBAL NAVBAR (Frosted Glass) ── */
         .portfolio-header {
@@ -309,6 +313,22 @@
             transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
+        @keyframes bgZoomEntrance {
+            from { transform: scale(1.1); filter: brightness(0) blur(10px); }
+            to { transform: scale(1); filter: brightness(0.65) contrast(1.1) blur(0); }
+        }
+
+        @keyframes contentLift {
+            from { 
+                opacity: 0;
+                transform: translateY(40px) scale(0.98);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         .hero-bg {
             position: absolute;
             top: 0;
@@ -317,7 +337,7 @@
             height: 100%;
             object-fit: cover;
             z-index: -1;
-            filter: brightness(0.65) contrast(1.1);
+            animation: bgZoomEntrance 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .hero-overlay.hidden {
@@ -361,6 +381,8 @@
             letter-spacing: -2px;
             color: #fff;
             text-align: center;
+            opacity: 0;
+            animation: contentLift 1.8s cubic-bezier(0.19, 1, 0.22, 1) 0.4s forwards;
         }
 
         .hero-footer-split {
@@ -378,26 +400,71 @@
             color: #e2e2e2;
             text-align: left;
             max-width: 100%;
+            opacity: 0;
+            animation: contentLift 1.8s cubic-bezier(0.19, 1, 0.22, 1) 0.7s forwards;
         }
 
         .enter-btn-pill {
             background: transparent;
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 0.6rem 1.5rem;
+            padding: 0.8rem 2.2rem;
             font-family: 'Inter', sans-serif;
-            font-size: 0.65rem;
-            letter-spacing: 1px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             white-space: nowrap;
             align-self: flex-start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1;
+            opacity: 0;
+            animation: contentLift 1.8s cubic-bezier(0.19, 1, 0.22, 1) 1s forwards;
+        }
+
+        .enter-btn-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: -1;
         }
 
         .enter-btn-pill:hover {
-            background: #fff;
             color: #000;
+            border-color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .enter-btn-pill:hover::before {
+            transform: translateY(0);
+        }
+
+        .enter-btn-pill .arrow {
+            display: inline-block;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 1rem;
+        }
+
+        .enter-btn-pill:hover .arrow {
+            transform: translateY(4px);
+        }
+
+        .enter-btn-pill:active {
+            transform: translateY(0) scale(0.98);
         }
 
         /* ── DESKTOP/TABLET QUERIES ── */
@@ -793,7 +860,7 @@
                 </svg>
             </a>
             <!-- WhatsApp -->
-            <a href="wa.me/233234567890" class="social-link" aria-label="WhatsApp">
+            <a href="https://wa.me/233234567890" class="social-link" aria-label="WhatsApp">
                 <svg viewBox="0 0 24 24">
                     <path
                         d="M11.996 0A12 12 0 000 12c0 2.09.52 4.05 1.44 5.75L0 24l6.4-1.39A11.96 11.96 0 0011.996 24C18.625 24 24 18.625 24 12S18.625 0 11.996 0zM12 21.96c-1.63 0-3.17-.42-4.52-1.16l-.32-.18-3.38.74.75-3.34-.2-.33A9.97 9.97 0 012.04 12C2.04 6.5 6.51 2.04 12 2.04S21.96 6.5 21.96 12 17.5 21.96 12 21.96zm5.55-7.53c-.3-.15-1.8-.89-2.07-1-.28-.1-.49-.15-.69.15-.2.3-.78 1-.95 1.2-.18.2-.35.23-.65.08A8.2 8.2 0 0110.8 12.5a9.05 9.05 0 01-1.63-2.03c-.18-.3.02-.45.17-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53h-.6c-.2 0-.52.07-.8.37s-1.04 1.02-1.04 2.48c0 1.47 1.07 2.89 1.21 3.09.15.2 2.08 3.25 5.1 4.54.72.3 1.28.48 1.72.62.72.23 1.38.2 1.9.12.58-.09 1.8-.73 2.05-1.44.25-.7.25-1.3.18-1.43-.08-.13-.28-.2-.58-.35z" />
@@ -875,7 +942,7 @@
 
         enterBtn.addEventListener('click', () => {
             heroOverlay.classList.add('hidden');
-            // Staggered reveal for grid items
+            // Staggered reveal as the curtain lifts
             items.forEach((item, index) => {
                 setTimeout(() => {
                     item.el.classList.add('revealed');
@@ -883,29 +950,29 @@
             });
         });
 
-        // ── INFINITE GRID LOGIC (Responsive) ──
+        // ── PLATINUM GRID ENGINE ──
         const container = document.getElementById('gallery-container');
         const grid = document.getElementById('grid');
+        const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
-        // Check window size to determine Grid Item dimensions (Mobile First Logic)
-        const isMobile = window.innerWidth < 768;
-
-        // Smaller items and gaps on mobile so you can see the grid better (Reduced by 20%)
         const itemActualW = isMobile ? 200 : 256;
         const itemActualH = isMobile ? 300 : 336;
         const gap = isMobile ? 15 : 30;
-
         const itemW = itemActualW + gap;
         const itemH = itemActualH + gap;
 
-        // Ensure we cover full viewport.
-        const cols = 12;
-        const rows = 10;
+        // Buffer zones: 14x12 grid instead of 12x10
+        const cols = 14; 
+        const rows = 12; 
         const totalW = cols * itemW;
         const totalH = rows * itemH;
 
-        // Image Sources
+        // Using pre-computed imageSources (same as before)
         const imageSources = [
+            { src: './i.am.kakpe/485492466_17925309888025731_7626418343488923576_n.jpg', name: 'i.am.kakape' },
+            { src: './i.am.kakpe/486655536_18492561112006462_5981196424839271321_n.jpg', name: 'i.am.kakape' },
+            { src: './i.am.kakpe/491461718_17927838315025731_6073027245294905678_n.jpg', name: 'i.am.kakape' },
+            { src: './i.am.kakpe/491464833_17930133522025731_5717421072113813218_n.jpg', name: 'i.am.kakape' },
             { src: './i.am.kakpe/544112729_17944078593025731_1577401041159391254_n.jpg', name: 'i.am.kakape' },
             { src: './i.am.kakpe/547942206_17944375704025731_924546056585511851_n.jpg', name: 'i.am.kakape' },
             { src: './i.am.kakpe/563603449_17947642101025731_8240427030025265659_n.jpg', name: 'i.am.kakape' },
@@ -925,27 +992,32 @@
         ];
 
         const items = [];
-        let imgIndex = 0;
+        const gridMatrix = Array.from({ length: cols }, () => Array(rows).fill(null));
 
-        // Generate DOM nodes
         for (let c = 0; c < cols; c++) {
             for (let r = 0; r < rows; r++) {
                 const el = document.createElement('div');
                 el.className = 'gallery-item';
                 el.style.width = itemActualW + 'px';
                 el.style.height = itemActualH + 'px';
-
                 const inner = document.createElement('div');
                 inner.className = 'gallery-item-inner';
 
-                const source = imageSources[imgIndex % imageSources.length];
+                const forbidden = new Set();
+                for (let i = c - 1; i <= c + 1; i++) {
+                    for (let j = r - 1; j <= r + 1; j++) {
+                        if (i >= 0 && i < cols && j >= 0 && j < rows && gridMatrix[i][j]) forbidden.add(gridMatrix[i][j]);
+                    }
+                }
+                const available = imageSources.filter(src => !forbidden.has(src.src));
+                const source = (available.length > 5 ? available : imageSources)[Math.floor(Math.random() * (available.length > 5 ? available.length : imageSources.length))];
+                gridMatrix[c][r] = source.src;
 
                 const img = document.createElement('img');
                 img.src = source.src;
-
+                img.loading = "lazy";
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
-
                 const title = document.createElement('h3');
                 title.innerText = source.name;
 
@@ -955,146 +1027,97 @@
                 el.appendChild(inner);
                 grid.appendChild(el);
 
-                const currentImgIndex = imgIndex;
-                el.addEventListener('click', (e) => {
-                    if (wasDragged) return;
-                    openLightbox(currentImgIndex % imageSources.length);
-                });
+                const sourceIndex = imageSources.findIndex(s => s.src === source.src);
+                el.addEventListener('click', () => { if (!wasDragged) openLightbox(sourceIndex); });
 
                 items.push({
-                    el: el,
-                    initialX: c * itemW,
-                    initialY: r * itemH
+                    el,
+                    initialX: (c - Math.floor(cols / 2)) * itemW,
+                    initialY: (r - Math.floor(rows / 2)) * itemH
                 });
 
-                imgIndex++;
             }
         }
 
-        // State Variables
-        let globalX = 0;
-        let globalY = 0;
-        let isDragging = false;
-        let wasDragged = false;
-        let dragStartX = 0;
-        let dragStartY = 0;
-        let prevMouseX, prevMouseY;
-        let velocityX = 0;
-        let velocityY = 0;
-
+        let targetX = 0, targetY = 0, currentX = 0, currentY = 0;
+        let isDragging = false, wasDragged = false;
+        let dragStartX, dragStartY, prevMouseX, prevMouseY;
+        let velocityX = 0, velocityY = 0;
         let animationId;
 
-        // Wrap logic
         function wrap(value, min, max) {
             const range = max - min;
             return ((((value - min) % range) + range) % range) + min;
         }
 
         function render() {
+            const winW = window.innerWidth, winH = window.innerHeight;
+            // Buffer Margin (images cull 600px beyond screen, well before the wrap at ~2000px)
+            const margin = 600;
+
             items.forEach(item => {
-                const x = wrap(item.initialX + globalX, -itemW, totalW - itemW);
-                const y = wrap(item.initialY + globalY, -itemH, totalH - itemH);
-                item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
+                const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
+                
+                if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
+                    item.el.style.visibility = 'hidden';
+                } else {
+                    item.el.style.visibility = 'visible';
+                    item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                }
             });
         }
 
-        // Main Animation Loop
+
         function loop() {
+            currentX += (targetX - currentX) * 0.1;
+            currentY += (targetY - currentY) * 0.1;
             if (!isDragging) {
-                // Physics: slightly more slippery/natural friction for touch devices
-                velocityX *= 0.94;
-                velocityY *= 0.94;
-
-                // Stop loop to preserve battery on mobile when fully resting
-                if (Math.abs(velocityX) < 0.1) velocityX = 0;
-                if (Math.abs(velocityY) < 0.1) velocityY = 0;
-
-                globalX += velocityX;
-                globalY += velocityY;
-
-                render();
+                velocityX *= 0.94; velocityY *= 0.94;
+                if (Math.abs(velocityX) < 0.01) velocityX = 0;
+                if (Math.abs(velocityY) < 0.01) velocityY = 0;
+                targetX += velocityX; targetY += velocityY;
             }
-            if (Math.abs(velocityX) > 0 || Math.abs(velocityY) > 0 || isDragging) {
-                animationId = requestAnimationFrame(loop);
-            }
+            render();
+            animationId = requestAnimationFrame(loop);
         }
 
-        render();
-
-        // Dragging Events
         const portfolioHeader = document.getElementById('portfolio-header');
-
-        container.addEventListener('mousedown', dragStart);
-        container.addEventListener('touchstart', dragStart, { passive: false });
-
-        window.addEventListener('mouseup', dragEnd);
-        window.addEventListener('touchend', dragEnd);
-
-        window.addEventListener('mousemove', drag);
-        window.addEventListener('touchmove', drag, { passive: false });
-
-        window.addEventListener('wheel', (e) => {
-            // Translate trackpad/mouse-wheel scrolling directly into grid movement.
-            // Mac trackpads natively supply inertia deltas, making this buttery smooth out of the box.
-            globalX -= e.deltaX;
-            globalY -= e.deltaY;
-            render();
-        }, { passive: true });
-
         function dragStart(e) {
-            isDragging = true;
-            wasDragged = false;
+            isDragging = true; wasDragged = false;
             portfolioHeader.classList.add('smart-hide');
-
-            // Critical Fix: Removed preventDefault() on touchstart to allow mobile clicks
-            // CSS 'touch-action: none' handles the native scroll lock perfectly now.
-
-
+            grid.classList.add('dragging');
             prevMouseX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             prevMouseY = e.type.includes('mouse') ? e.pageY : e.touches[0].clientY;
-
-            dragStartX = prevMouseX;
-            dragStartY = prevMouseY;
-
-            velocityX = 0;
-            velocityY = 0;
-
-            cancelAnimationFrame(animationId);
-            loop(); // force animation loop start if it was resting
+            dragStartX = prevMouseX; dragStartY = prevMouseY;
+            velocityX = 0; velocityY = 0;
         }
 
         function drag(e) {
             if (!isDragging) return;
-            if (e.type === 'touchmove') e.preventDefault();
-
             const x = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
             const y = e.type.includes('mouse') ? e.pageY : e.touches[0].clientY;
-
-            if (Math.abs(x - dragStartX) > 5 || Math.abs(y - dragStartY) > 5) {
-                wasDragged = true;
-            }
-
-            // Adjust tracking for better feel on mobile screens (1:1 tracking)
-            velocityX = x - prevMouseX;
-            velocityY = y - prevMouseY;
-
-            prevMouseX = x;
-            prevMouseY = y;
-
-            globalX += velocityX;
-            globalY += velocityY;
-
-            render();
+            if (Math.hypot(x - dragStartX, y - dragStartY) > 10) wasDragged = true;
+            velocityX = x - prevMouseX; velocityY = y - prevMouseY;
+            prevMouseX = x; prevMouseY = y;
+            targetX += velocityX; targetY += velocityY;
         }
 
         function dragEnd() {
-            if (isDragging) {
-                isDragging = false;
-                portfolioHeader.classList.remove('smart-hide');
-                cancelAnimationFrame(animationId);
-                loop(); // Start decay physics
-            }
+            isDragging = false;
+            portfolioHeader.classList.remove('smart-hide');
+            grid.classList.remove('dragging');
         }
+
+        container.addEventListener('mousedown', dragStart);
+        container.addEventListener('touchstart', dragStart, { passive: true });
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag, { passive: false });
+        window.addEventListener('mouseup', dragEnd);
+        window.addEventListener('touchend', dragEnd);
+        window.addEventListener('wheel', (e) => { targetX -= e.deltaX; targetY -= e.deltaY; }, { passive: true });
+        loop();
+
 
         // ── LIGHTBOX LOGIC ──
         const lightbox = document.getElementById('lightbox');
@@ -1220,4 +1243,4 @@
     </script>
 </body>
 
-</html>
+</html>we
