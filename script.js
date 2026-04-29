@@ -59,8 +59,106 @@ const imageSources = [
     { src: './i.am.kakpe/642751844_18510753667072578_5985830290176820310_n.jpg', name: 'Kojo Kwarteng' }
 ];
 
+// ── ENHANCED DISTRIBUTION ALGORITHM ──
+// Deck-based shuffle with larger forbidden radius and multiple grid patterns
+
+const FORBIDDEN_RADIUS = 2; // Check 5x5 area instead of 3x3
+const NUM_GRID_PATTERNS = 3; // Create 3 different grid arrangements
+const gridPatterns = [];
+
+// Helper: Get all positions within forbidden radius
+function getForbiddenPositions(col, row, cols, rows, radius) {
+    const forbidden = new Set();
+    for (let i = col - radius; i <= col + radius; i++) {
+        for (let j = row - radius; j <= row + radius; j++) {
+            if (i >= 0 && i < cols && j >= 0 && j < rows) {
+                forbidden.add(`${i},${j}`);
+            }
+        }
+    }
+    return forbidden;
+}
+
+// Helper: Create a single grid pattern with enhanced distribution
+function createGridPattern(patternOffset) {
+    const patternMatrix = Array.from({ length: cols }, () => Array(rows).fill(null));
+    const positionList = [];
+    
+    // Create ordered list of all positions, shuffled differently per pattern
+    for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+            positionList.push({ col: c, row: r });
+        }
+    }
+    
+    // Shuffle positions with pattern-specific seed
+    positionList.sort((a, b) => {
+        const seedA = (a.col * 73 + a.row * 151 + patternOffset * 337) % 1000;
+        const seedB = (b.col * 73 + b.row * 151 + patternOffset * 337) % 1000;
+        return seedA - seedB;
+    });
+    
+    // Track usage count for each image to ensure even distribution
+    const usageCount = new Map(imageSources.map((_, idx) => [idx, 0]));
+    
+    // Assign images using deck-based approach
+    positionList.forEach(({ col, row }) => {
+        // Get forbidden positions for current cell
+        const forbiddenPos = getForbiddenPositions(col, row, cols, rows, FORBIDDEN_RADIUS);
+        
+        // Collect images used in forbidden zone
+        const forbiddenImages = new Set();
+        forbiddenPos.forEach(posKey => {
+            if (posKey !== `${col},${row}`) {
+                const [ci, ri] = posKey.split(',').map(Number);
+                if (patternMatrix[ci][ri]) {
+                    forbiddenImages.add(patternMatrix[ci][ri]);
+                }
+            }
+        });
+        
+        // Find available images (not in forbidden zone), prioritizing least-used
+        let available = imageSources
+            .map((src, idx) => ({ src, idx }))
+            .filter(item => !forbiddenImages.has(item.idx));
+        
+        // If too few available (edge cases), expand search slightly but still avoid immediate neighbors
+        if (available.length < 3) {
+            const immediateForbidden = new Set();
+            for (let i = col - 1; i <= col + 1; i++) {
+                for (let j = row - 1; j <= row + 1; j++) {
+                    if (i >= 0 && i < cols && j >= 0 && j < rows && patternMatrix[i][j]) {
+                        immediateForbidden.add(patternMatrix[i][j]);
+                    }
+                }
+            }
+            available = imageSources
+                .map((src, idx) => ({ src, idx }))
+                .filter(item => !immediateForbidden.has(item.idx));
+        }
+        
+        // Select image with lowest usage count (most even distribution)
+        available.sort((a, b) => usageCount.get(a.idx) - usageCount.get(b.idx));
+        
+        // Add small randomness among top candidates to avoid rigid patterns
+        const topCandidates = available.slice(0, Math.min(5, available.length));
+        const selected = topCandidates[Math.floor(Math.random() * topCandidates.length)];
+        
+        patternMatrix[col][row] = selected.idx;
+        usageCount.set(selected.idx, usageCount.get(selected.idx) + 1);
+    });
+    
+    return patternMatrix;
+}
+
+// Generate multiple grid patterns
+for (let p = 0; p < NUM_GRID_PATTERNS; p++) {
+    gridPatterns.push(createGridPattern(p));
+}
+
+// Create DOM elements and assign to items array
 const items = [];
-const gridMatrix = Array.from({ length: cols }, () => Array(rows).fill(null));
+const gridMatrix = gridPatterns[0]; // Use first pattern for initial render
 
 for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
@@ -71,15 +169,8 @@ for (let c = 0; c < cols; c++) {
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
 
-        const forbidden = new Set();
-        for (let i = c - 1; i <= c + 1; i++) {
-            for (let j = r - 1; j <= r + 1; j++) {
-                if (i >= 0 && i < cols && j >= 0 && j < rows && gridMatrix[i][j]) forbidden.add(gridMatrix[i][j]);
-            }
-        }
-        const available = imageSources.filter(src => !forbidden.has(src.src));
-        const source = (available.length > 5 ? available : imageSources)[Math.floor(Math.random() * (available.length > 5 ? available.length : imageSources.length))];
-        gridMatrix[c][r] = source.src;
+        const sourceIdx = gridMatrix[c][r];
+        const source = imageSources[sourceIdx];
 
         const img = document.createElement('img');
         img.src = source.src;
@@ -95,15 +186,62 @@ for (let c = 0; c < cols; c++) {
         el.appendChild(inner);
         grid.appendChild(el);
 
-        const sourceIndex = imageSources.findIndex(s => s.src === source.src);
-        el.addEventListener('click', () => { if (!wasDragged) openLightbox(sourceIndex); });
+        // Store click handler index in the element itself for dynamic updates
+        el.dataset.sourceIdx = sourceIdx;
+        el.addEventListener('click', () => { 
+            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
 
         items.push({
             el,
             initialX: (c - Math.floor(cols / 2)) * itemW,
-            initialY: (r - Math.floor(rows / 2)) * itemH
+            initialY: (r - Math.floor(rows / 2)) * itemH,
+            gridCol: c,
+            gridRow: r,
+            sourceIdx: sourceIdx
         });
+    }
+}
 
+// Track which pattern is currently active for seamless transitions
+let currentPatternIndex = 0;
+
+// Function to switch to next grid pattern when panning beyond threshold
+function updateGridPatternIfNeeded() {
+    const totalCols = cols;
+    const totalRows = rows;
+    const patternWidth = totalCols * itemW;
+    const patternHeight = totalRows * itemH;
+    
+    // Calculate which pattern section we're in based on scroll position
+    const normalizedX = ((currentX % patternWidth) + patternWidth) % patternWidth;
+    const normalizedY = ((currentY % patternHeight) + patternHeight) % patternHeight;
+    
+    // Determine pattern index based on position (creates virtual tiling)
+    const newPatternIndex = Math.floor(normalizedX / (patternWidth / NUM_GRID_PATTERNS)) % NUM_GRID_PATTERNS;
+    
+    if (newPatternIndex !== currentPatternIndex) {
+        currentPatternIndex = newPatternIndex;
+        const newPattern = gridPatterns[currentPatternIndex];
+        
+        // Update items with new pattern assignments
+        items.forEach((item) => {
+            const c = item.gridCol;
+            const r = item.gridRow;
+            const newSourceIdx = newPattern[c][r];
+            
+            if (newSourceIdx !== item.sourceIdx) {
+                const newSource = imageSources[newSourceIdx];
+                item.sourceIdx = newSourceIdx;
+                
+                // Update image source, caption, and click handler data attribute
+                const img = item.el.querySelector('.gallery-item-inner img');
+                const title = item.el.querySelector('.overlay h3');
+                if (img) img.src = newSource.src;
+                if (title) title.innerText = newSource.name;
+                item.el.dataset.sourceIdx = newSourceIdx;
+            }
+        });
     }
 }
 
@@ -146,6 +284,10 @@ function loop() {
         if (Math.abs(velocityY) < 0.01) velocityY = 0;
         targetX += velocityX; targetY += velocityY;
     }
+    
+    // Check for pattern transitions during panning
+    updateGridPatternIfNeeded();
+    
     render();
     animationId = requestAnimationFrame(loop);
 }
