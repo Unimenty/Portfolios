@@ -427,7 +427,7 @@ body {
     text-transform: uppercase;
     border-radius: 50px;
     cursor: pointer;
-    transition: color 0.5s cubic-bezier(0.23, 1, 0.32, 1), 
+    transition: color 0.5s cubic-bezier(0.23, 1, 0.32, 1),
                 border-color 0.5s cubic-bezier(0.23, 1, 0.32, 1),
                 box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     white-space: nowrap;
