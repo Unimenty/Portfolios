@@ -5,10 +5,16 @@ const heroOverlay = document.getElementById('hero-overlay');
 enterBtn.addEventListener('click', () => {
     heroOverlay.classList.add('hidden');
     // Staggered reveal as the curtain lifts
+        items.sort((a, b) => {
+            const distA = Math.hypot(a.initialX, a.initialY);
+            const distB = Math.hypot(b.initialX, b.initialY);
+            return distA - distB;
+        });
+
     items.forEach((item, index) => {
         setTimeout(() => {
             item.el.classList.add('revealed');
-        }, 50 * (index % 12 + Math.floor(index / 12) * 2));
+            }, index * 15);
     });
 });
 
@@ -298,16 +304,44 @@ if (!isMobile) {
     dot.style.display = 'block';
 
     window.addEventListener('mousemove', (e) => {
+        const target = e.target;
+
+        // Parallax Hero
+        const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+        const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+        const heroBg = document.querySelector('.hero-bg');
+        if (heroBg && !heroOverlay.classList.contains('hidden')) {
+            heroBg.style.transform = `scale(1.05) translate(${moveX}px, ${moveY}px)`;
+        }
+
+        const isMagnetic = target.closest('.enter-btn-pill, .social-link, .burger-btn, .nav-link, .menu-inquiry-btn');
+        
+        // Custom Cursor movement
         ring.style.left = e.clientX + 'px';
         ring.style.top = e.clientY + 'px';
         dot.style.left = e.clientX + 'px';
         dot.style.top = e.clientY + 'px';
 
-        const target = e.target;
-        if (target.closest('a, button, .grid-item, .burger-btn')) {
+        if (target.closest('a, button, .gallery-item, .burger-btn')) {
             document.body.classList.add('cursor-active');
         } else {
             document.body.classList.remove('cursor-active');
         }
+
+        // Magnetic Effect
+        if (isMagnetic) {
+            const m = isMagnetic;
+            const rect = m.getBoundingClientRect();
+            const relX = e.clientX - rect.left - rect.width / 2;
+            const relY = e.clientY - rect.top - rect.height / 2;
+            m.style.transform = `translate(${relX * 0.3}px, ${relY * 0.3}px)`;
+        }
+    });
+
+    // Reset Magnetic on Mouseleave
+    document.querySelectorAll('.enter-btn-pill, .social-link, .burger-btn, .nav-link, .menu-inquiry-btn').forEach(btn => {
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = '';
+        });
     });
 }
