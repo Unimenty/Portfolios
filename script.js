@@ -186,11 +186,11 @@ for (let c = 0; c < cols; c++) {
         el.appendChild(inner);
         grid.appendChild(el);
 
-        // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
-        el.addEventListener('click', () => { 
-            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
-        });
+        el.tabIndex = 0; el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View photo by ${source.name}`);
+        el.onclick = () => !wasDragged && openLightbox(+el.dataset.sourceIdx);
+        el.onkeydown = (e) => (e.key==='Enter'||e.key===' ') && !wasDragged && (e.preventDefault(), openLightbox(+el.dataset.sourceIdx));
 
         items.push({
             el,
@@ -264,13 +264,10 @@ function render() {
     items.forEach(item => {
         const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
-
-        if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
-        } else {
-            item.el.style.visibility = 'visible';
-            item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        }
+        const vis = !(x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin);
+        item.el.style.visibility = vis ? 'visible' : 'hidden';
+        item.el.tabIndex = vis ? 0 : -1;
+        if (vis) item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     });
 }
 
@@ -377,6 +374,15 @@ document.getElementById('lightbox-next').addEventListener('click', (e) => {
 lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox || e.target.id === 'lightbox-content') {
         closeLightbox();
+    }
+});
+
+window.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key.includes('Arrow')) {
+        currentLbIndex = (currentLbIndex + (e.key === 'ArrowRight' ? 1 : -1) + imageSources.length) % imageSources.length;
+        updateLightbox();
     }
 });
 
