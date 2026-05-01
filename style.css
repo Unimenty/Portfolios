@@ -76,6 +76,12 @@ body {
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* ── ACCESSIBILITY & FOCUS ── */
+:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
 /* ── GRID ENTRANCE ── */
 .gallery-item {
     opacity: 0;
@@ -540,7 +546,8 @@ body {
     z-index: 1;
 }
 
-.gallery-item:hover {
+.gallery-item:hover,
+.gallery-item:focus {
     z-index: 10;
 }
 
@@ -564,7 +571,8 @@ body {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     }
 
-    .gallery-item:hover .gallery-item-inner {
+    .gallery-item:hover .gallery-item-inner,
+    .gallery-item:focus .gallery-item-inner {
         transform: scale(1.08) translateY(-10px);
         filter: brightness(1.1) grayscale(0);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
@@ -572,7 +580,8 @@ body {
 }
 
 /* On mobile, tapping brightens it up natively via active state or we just leave it dark and brighten in focus */
-.gallery-item:active .gallery-item-inner {
+.gallery-item:active .gallery-item-inner,
+.gallery-item:focus .gallery-item-inner {
     filter: brightness(1) grayscale(0);
 }
 

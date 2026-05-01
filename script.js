@@ -188,8 +188,19 @@ for (let c = 0; c < cols; c++) {
 
         // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
+        el.tabIndex = 0;
+        el.role = "button";
+        el.ariaLabel = `View photo: ${source.name}`;
+
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -267,8 +278,10 @@ function render() {
 
         if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
             item.el.style.visibility = 'hidden';
+            item.el.tabIndex = -1;
         } else {
             item.el.style.visibility = 'visible';
+            item.el.tabIndex = 0;
             item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         }
     });
@@ -336,6 +349,27 @@ window.addEventListener('touchmove', drag, { passive: false });
 window.addEventListener('mouseup', dragEnd);
 window.addEventListener('touchend', dragEnd);
 window.addEventListener('wheel', (e) => { targetX -= e.deltaX; targetY -= e.deltaY; }, { passive: true });
+
+// Global Keyboard Shortcuts
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeLightbox();
+        document.getElementById('services').classList.remove('active');
+        if (navOverlay.classList.contains('active')) {
+            burgerBtn.click();
+        }
+    }
+    if (lightbox.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') {
+            currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+            updateLightbox();
+        } else if (e.key === 'ArrowRight') {
+            currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+            updateLightbox();
+        }
+    }
+});
+
 loop();
 
 
@@ -344,11 +378,14 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    document.getElementById('lightbox-close').focus();
 }
 
 function updateLightbox() {
@@ -358,6 +395,7 @@ function updateLightbox() {
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) lastFocusedElement.focus();
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -386,7 +424,14 @@ const navOverlay = document.getElementById('nav-overlay');
 
 burgerBtn.addEventListener('click', () => {
     const isActive = burgerBtn.classList.toggle('active');
-    navOverlay.classList.toggle('active');
+    if (isActive) {
+        lastFocusedElement = document.activeElement;
+        navOverlay.classList.add('active');
+        navOverlay.querySelector('.nav-link').focus();
+    } else {
+        navOverlay.classList.remove('active');
+        if (lastFocusedElement) lastFocusedElement.focus();
+    }
 
     // Prevent scrolling on the grid when menu is up
     document.body.style.overflow = isActive ? 'hidden' : '';
@@ -407,7 +452,10 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
             heroOverlay.classList.add('hidden');
         } else if (href === '#services') {
             e.preventDefault();
-            document.getElementById('services').classList.add('active');
+            lastFocusedElement = document.activeElement;
+            const services = document.getElementById('services');
+            services.classList.add('active');
+            document.getElementById('services-close').focus();
         }
 
         burgerBtn.classList.remove('active');
@@ -419,6 +467,7 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
 // Services close
 document.getElementById('services-close').addEventListener('click', () => {
     document.getElementById('services').classList.remove('active');
+    if (lastFocusedElement) lastFocusedElement.focus();
 });
 
 // Close menu on background click
