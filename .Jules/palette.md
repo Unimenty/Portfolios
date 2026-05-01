@@ -1,0 +1,3 @@
+## 2024-05-01 - [Keyboard Navigation in Infinite 3D Grids]
+**Learning:** In infinite or virtualized grids (like the Platinum Grid Engine), elements that are "off-screen" but still exist in the DOM can steal keyboard focus, creating a confusing experience where the focus ring disappears. Simple CSS visibility is often not enough if the elements are just transformed away.
+**Action:** Implement "Tabindex Culling" - dynamically set `tabindex="-1"` for items that are culled or far from the viewport, and `tabindex="0"` for visible items. This ensures the Tab key only cycles through interactive, visible content.
