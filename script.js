@@ -188,8 +188,20 @@ for (let c = 0; c < cols; c++) {
 
         // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
-        el.addEventListener('click', () => { 
-            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View photo by ${source.name}`);
+
+        const triggerLightbox = () => {
+            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx));
+        };
+
+        el.addEventListener('click', triggerLightbox);
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                triggerLightbox();
+            }
         });
 
         items.push({
@@ -240,6 +252,7 @@ function updateGridPatternIfNeeded() {
                 if (img) img.src = newSource.src;
                 if (title) title.innerText = newSource.name;
                 item.el.dataset.sourceIdx = newSourceIdx;
+                item.el.setAttribute('aria-label', `View photo by ${newSource.name}`);
             }
         });
     }

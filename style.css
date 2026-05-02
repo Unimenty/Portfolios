@@ -564,10 +564,20 @@ body {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     }
 
-    .gallery-item:hover .gallery-item-inner {
+    .gallery-item:hover .gallery-item-inner,
+    .gallery-item:focus-visible .gallery-item-inner {
         transform: scale(1.08) translateY(-10px);
         filter: brightness(1.1) grayscale(0);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .gallery-item:focus-visible {
+        outline: none;
+    }
+
+    .gallery-item:focus-visible .gallery-item-inner {
+        outline: 2px solid #fff;
+        outline-offset: 4px;
     }
 }
 
