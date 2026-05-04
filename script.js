@@ -162,19 +162,24 @@ const gridMatrix = gridPatterns[0]; // Use first pattern for initial render
 
 for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
+        const sourceIdx = gridMatrix[c][r];
+        const source = imageSources[sourceIdx];
+
         const el = document.createElement('div');
         el.className = 'gallery-item';
         el.style.width = itemActualW + 'px';
         el.style.height = itemActualH + 'px';
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View image: ${source.name}`);
+
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
-
-        const sourceIdx = gridMatrix[c][r];
-        const source = imageSources[sourceIdx];
 
         const img = document.createElement('img');
         img.src = source.src;
         img.loading = "lazy";
+        img.alt = source.name;
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
         const title = document.createElement('h3');
@@ -190,6 +195,13 @@ for (let c = 0; c < cols; c++) {
         el.dataset.sourceIdx = sourceIdx;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -265,11 +277,15 @@ function render() {
         const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
 
-        if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
-        } else {
-            item.el.style.visibility = 'visible';
+        const isVisible = !(x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin);
+        if (isVisible) {
             item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        }
+
+        const newVisibility = isVisible ? 'visible' : 'hidden';
+        if (item.el.style.visibility !== newVisibility) {
+            item.el.style.visibility = newVisibility;
+            item.el.setAttribute('tabindex', isVisible ? '0' : '-1');
         }
     });
 }
@@ -339,6 +355,9 @@ window.addEventListener('wheel', (e) => { targetX -= e.deltaX; targetY -= e.delt
 loop();
 
 
+// ── FOCUS RESTORATION HELPER ──
+let lastFocusedElement;
+
 // ── LIGHTBOX LOGIC ──
 const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
@@ -346,9 +365,11 @@ const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    document.getElementById('lightbox-close').focus();
 }
 
 function updateLightbox() {
@@ -358,6 +379,7 @@ function updateLightbox() {
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) lastFocusedElement.focus();
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -388,8 +410,13 @@ burgerBtn.addEventListener('click', () => {
     const isActive = burgerBtn.classList.toggle('active');
     navOverlay.classList.toggle('active');
 
-    // Prevent scrolling on the grid when menu is up
-    document.body.style.overflow = isActive ? 'hidden' : '';
+    if (isActive) {
+        lastFocusedElement = burgerBtn;
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+        if (lastFocusedElement) lastFocusedElement.focus();
+    }
 });
 
 // Generic Nav Link Handler (Specialized for single page interaction)
@@ -399,7 +426,8 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
 
         // Reset everything first
         heroOverlay.classList.remove('hidden');
-        document.getElementById('services').classList.remove('active');
+        const services = document.getElementById('services');
+        services.classList.remove('active');
 
         if (href === '#hero-overlay') {
             // Already resetting by removing 'hidden'
@@ -407,7 +435,9 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
             heroOverlay.classList.add('hidden');
         } else if (href === '#services') {
             e.preventDefault();
-            document.getElementById('services').classList.add('active');
+            lastFocusedElement = link;
+            services.classList.add('active');
+            document.getElementById('services-close').focus();
         }
 
         burgerBtn.classList.remove('active');
@@ -419,6 +449,7 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
 // Services close
 document.getElementById('services-close').addEventListener('click', () => {
     document.getElementById('services').classList.remove('active');
+    if (lastFocusedElement) lastFocusedElement.focus();
 });
 
 // Close menu on background click
@@ -427,6 +458,7 @@ navOverlay.addEventListener('click', (e) => {
         burgerBtn.classList.remove('active');
         navOverlay.classList.remove('active');
         document.body.style.overflow = '';
+        if (lastFocusedElement) lastFocusedElement.focus();
     }
 });
 
@@ -434,6 +466,7 @@ navOverlay.addEventListener('click', (e) => {
 document.getElementById('services').addEventListener('click', (e) => {
     if (e.target === document.getElementById('services')) {
         document.getElementById('services').classList.remove('active');
+        if (lastFocusedElement) lastFocusedElement.focus();
     }
 });
 
