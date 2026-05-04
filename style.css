@@ -22,6 +22,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── ACCESSIBILITY: FOCUS STATES ── */
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 4px;
+}
+
 .noise-overlay {
     position: fixed;
     top: 0;
