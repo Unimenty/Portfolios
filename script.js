@@ -174,6 +174,7 @@ for (let c = 0; c < cols; c++) {
 
         const img = document.createElement('img');
         img.src = source.src;
+        img.alt = source.name;
         img.loading = "lazy";
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
@@ -186,10 +187,18 @@ for (let c = 0; c < cols; c++) {
         el.appendChild(inner);
         grid.appendChild(el);
 
-        // Store click handler index in the element itself for dynamic updates
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View ${source.name}`);
+        el.setAttribute('tabindex', '0');
         el.dataset.sourceIdx = sourceIdx;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -237,8 +246,9 @@ function updateGridPatternIfNeeded() {
                 // Update image source, caption, and click handler data attribute
                 const img = item.el.querySelector('.gallery-item-inner img');
                 const title = item.el.querySelector('.overlay h3');
-                if (img) img.src = newSource.src;
+        if (img) { img.src = newSource.src; img.alt = newSource.name; }
                 if (title) title.innerText = newSource.name;
+        item.el.setAttribute('aria-label', `View ${newSource.name}`);
                 item.el.dataset.sourceIdx = newSourceIdx;
             }
         });
@@ -258,18 +268,19 @@ function wrap(value, min, max) {
 
 function render() {
     const winW = window.innerWidth, winH = window.innerHeight;
-    // Buffer Margin (images cull 600px beyond screen, well before the wrap at ~2000px)
     const margin = 600;
 
     items.forEach(item => {
         const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
 
-        if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
-        } else {
-            item.el.style.visibility = 'visible';
-            item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        const isOffscreen = x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin;
+        item.el.style.visibility = isOffscreen ? 'hidden' : 'visible';
+        if (!isOffscreen) item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+        const newTabIndex = isOffscreen ? '-1' : '0';
+        if (item.el.getAttribute('tabindex') !== newTabIndex) {
+            item.el.setAttribute('tabindex', newTabIndex);
         }
     });
 }
@@ -344,21 +355,36 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocus = null;
 
 function openLightbox(index) {
+    lastFocus = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
+    lbImg.alt = imageSources[currentLbIndex].name;
     lbCaption.innerText = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocus) lastFocus.focus();
 }
+
+window.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        currentLbIndex = (currentLbIndex + (e.key === 'ArrowLeft' ? -1 : 1) + imageSources.length) % imageSources.length;
+        updateLightbox();
+    }
+});
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
 

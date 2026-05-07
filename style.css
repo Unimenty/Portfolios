@@ -42,6 +42,21 @@ body {
     /* Traditional cursor for mobile touch */
 }
 
+/* ── FOCUS INDICATORS ── */
+:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+.gallery-item:focus-visible {
+    outline-offset: 0;
+}
+
+.gallery-item:focus-visible .gallery-item-inner {
+    transform: scale(1.05);
+    filter: brightness(1.1) grayscale(0);
+}
+
 /* ── CUSTOM CURSOR ── */
 .cursor-ring {
     position: fixed;
