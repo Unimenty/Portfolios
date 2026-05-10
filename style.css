@@ -90,6 +90,24 @@ body {
     pointer-events: none;
 }
 
+/* ── ACCESSIBILITY ── */
+.gallery-item:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 4px;
+    z-index: 10;
+}
+
+.gallery-item:focus-visible .gallery-item-inner {
+    transform: scale(1.08) translateY(-10px);
+    filter: brightness(1.1) grayscale(0);
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
 
 
 /* ── GLOBAL NAVBAR (Frosted Glass) ── */
