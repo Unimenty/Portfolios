@@ -76,6 +76,18 @@ body {
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* ── ACCESSIBILITY ── */
+:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+.gallery-item:focus-visible .gallery-item-inner {
+    transform: scale(1.05);
+    filter: brightness(1.1) grayscale(0);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
 /* ── GRID ENTRANCE ── */
 .gallery-item {
     opacity: 0;
