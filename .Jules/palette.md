@@ -1,0 +1,3 @@
+## 2026-05-12 - Improving Grid & Lightbox Accessibility
+ **Learning:** In infinite or virtualized grids, dynamically manage tabIndex (0 for visible, -1 for hidden/culled) and perform a value check before updating the DOM attribute to avoid redundant writes and performance degradation in high-frequency render loops. Additionally, for luxury editorial sites with custom cursors, ensuring :focus-visible provides a high-contrast fallback is critical for keyboard users.
+ **Action:** Always implement dynamic tabIndex management in virtualized components and use :focus-visible for accessibility indicators.
