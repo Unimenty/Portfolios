@@ -166,6 +166,8 @@ for (let c = 0; c < cols; c++) {
         el.className = 'gallery-item';
         el.style.width = itemActualW + 'px';
         el.style.height = itemActualH + 'px';
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
 
@@ -174,7 +176,9 @@ for (let c = 0; c < cols; c++) {
 
         const img = document.createElement('img');
         img.src = source.src;
+        img.alt = source.name;
         img.loading = "lazy";
+        el.setAttribute('aria-label', `View ${source.name} photograph`);
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
         const title = document.createElement('h3');
@@ -190,6 +194,12 @@ for (let c = 0; c < cols; c++) {
         el.dataset.sourceIdx = sourceIdx;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -237,8 +247,12 @@ function updateGridPatternIfNeeded() {
                 // Update image source, caption, and click handler data attribute
                 const img = item.el.querySelector('.gallery-item-inner img');
                 const title = item.el.querySelector('.overlay h3');
-                if (img) img.src = newSource.src;
+                if (img) {
+                    img.src = newSource.src;
+                    img.alt = newSource.name;
+                }
                 if (title) title.innerText = newSource.name;
+                item.el.setAttribute('aria-label', `View ${newSource.name} photograph`);
                 item.el.dataset.sourceIdx = newSourceIdx;
             }
         });
@@ -267,8 +281,10 @@ function render() {
 
         if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
             item.el.style.visibility = 'hidden';
+            if (item.el.tabIndex !== -1) item.el.tabIndex = -1;
         } else {
             item.el.style.visibility = 'visible';
+            if (item.el.tabIndex !== 0) item.el.tabIndex = 0;
             item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         }
     });
@@ -344,20 +360,32 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
+
+// Ensure lightbox can be programmatically focused
+lightbox.tabIndex = -1;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
+    lbImg.alt = imageSources[currentLbIndex].name;
     lbCaption.innerText = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
+    if (!lightbox.classList.contains('active')) return;
     lightbox.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -377,6 +405,27 @@ document.getElementById('lightbox-next').addEventListener('click', (e) => {
 lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox || e.target.id === 'lightbox-content') {
         closeLightbox();
+    }
+});
+
+// Global Keydown Handler
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeLightbox();
+        document.getElementById('services').classList.remove('active');
+        burgerBtn.classList.remove('active');
+        navOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (lightbox.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') {
+            currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+            updateLightbox();
+        } else if (e.key === 'ArrowRight') {
+            currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+            updateLightbox();
+        }
     }
 });
 
