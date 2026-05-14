@@ -166,6 +166,9 @@ for (let c = 0; c < cols; c++) {
         el.className = 'gallery-item';
         el.style.width = itemActualW + 'px';
         el.style.height = itemActualH + 'px';
+        el.tabIndex = 0;
+        el.role = "button";
+        el.ariaLabel = "View photo";
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
 
@@ -188,8 +191,15 @@ for (let c = 0; c < cols; c++) {
 
         // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
-        el.addEventListener('click', () => { 
-            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        const triggerOpen = () => {
+            if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx));
+        };
+        el.addEventListener('click', triggerOpen);
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                triggerOpen();
+            }
         });
 
         items.push({
@@ -336,6 +346,20 @@ window.addEventListener('touchmove', drag, { passive: false });
 window.addEventListener('mouseup', dragEnd);
 window.addEventListener('touchend', dragEnd);
 window.addEventListener('wheel', (e) => { targetX -= e.deltaX; targetY -= e.deltaY; }, { passive: true });
+
+window.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') {
+        currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+        updateLightbox();
+    }
+    if (e.key === 'ArrowRight') {
+        currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+        updateLightbox();
+    }
+});
+
 loop();
 
 
@@ -344,20 +368,28 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
     lbCaption.innerText = imageSources[currentLbIndex].name;
+    lbImg.alt = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
