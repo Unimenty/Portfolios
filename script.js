@@ -188,8 +188,15 @@ for (let c = 0; c < cols; c++) {
 
         // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
+        el.tabIndex = 0;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -266,9 +273,15 @@ function render() {
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
 
         if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
+            if (item.el.style.visibility !== 'hidden') {
+                item.el.style.visibility = 'hidden';
+                item.el.tabIndex = -1;
+            }
         } else {
-            item.el.style.visibility = 'visible';
+            if (item.el.style.visibility !== 'visible') {
+                item.el.style.visibility = 'visible';
+                item.el.tabIndex = 0;
+            }
             item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         }
     });
@@ -344,20 +357,28 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
+    lbImg.alt = imageSources[currentLbIndex].name;
     lbCaption.innerText = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -380,13 +401,61 @@ lightbox.addEventListener('click', (e) => {
     }
 });
 
+// Global Keyboard Listeners
+window.addEventListener('keydown', (e) => {
+    const isLbActive = lightbox.classList.contains('active');
+    const isNavActive = navOverlay.classList.contains('active');
+    const servicesOverlay = document.getElementById('services');
+    const isServicesActive = servicesOverlay.classList.contains('active');
+
+    if (e.key === 'Escape') {
+        if (isLbActive) closeLightbox();
+        if (isNavActive) {
+            burgerBtn.classList.remove('active');
+            navOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
+        }
+        if (isServicesActive) {
+            servicesOverlay.classList.remove('active');
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
+        }
+    }
+
+    if (isLbActive) {
+        if (e.key === 'ArrowLeft') {
+            currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+            updateLightbox();
+        } else if (e.key === 'ArrowRight') {
+            currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+            updateLightbox();
+        }
+    }
+});
+
 // ── MENU OVERLAY LOGIC ──
 const burgerBtn = document.getElementById('burger-btn');
 const navOverlay = document.getElementById('nav-overlay');
 
 burgerBtn.addEventListener('click', () => {
     const isActive = burgerBtn.classList.toggle('active');
-    navOverlay.classList.toggle('active');
+    if (isActive) {
+        lastFocusedElement = document.activeElement;
+        navOverlay.classList.add('active');
+        navOverlay.focus();
+    } else {
+        navOverlay.classList.remove('active');
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+            lastFocusedElement = null;
+        }
+    }
 
     // Prevent scrolling on the grid when menu is up
     document.body.style.overflow = isActive ? 'hidden' : '';
@@ -399,7 +468,8 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
 
         // Reset everything first
         heroOverlay.classList.remove('hidden');
-        document.getElementById('services').classList.remove('active');
+        const servicesOverlay = document.getElementById('services');
+        servicesOverlay.classList.remove('active');
 
         if (href === '#hero-overlay') {
             // Already resetting by removing 'hidden'
@@ -407,7 +477,9 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
             heroOverlay.classList.add('hidden');
         } else if (href === '#services') {
             e.preventDefault();
-            document.getElementById('services').classList.add('active');
+            lastFocusedElement = document.activeElement;
+            servicesOverlay.classList.add('active');
+            servicesOverlay.focus();
         }
 
         burgerBtn.classList.remove('active');
@@ -419,6 +491,10 @@ document.querySelectorAll('.nav-link, #brand-link').forEach(link => {
 // Services close
 document.getElementById('services-close').addEventListener('click', () => {
     document.getElementById('services').classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 });
 
 // Close menu on background click
@@ -427,13 +503,22 @@ navOverlay.addEventListener('click', (e) => {
         burgerBtn.classList.remove('active');
         navOverlay.classList.remove('active');
         document.body.style.overflow = '';
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+            lastFocusedElement = null;
+        }
     }
 });
 
 // Close services on background click
 document.getElementById('services').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('services')) {
-        document.getElementById('services').classList.remove('active');
+    const servicesOverlay = document.getElementById('services');
+    if (e.target === servicesOverlay) {
+        servicesOverlay.classList.remove('active');
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+            lastFocusedElement = null;
+        }
     }
 });
 

@@ -166,9 +166,12 @@ body {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.social-link:hover {
+.social-link:hover,
+.social-link:focus-visible {
     opacity: 1;
     transform: scale(1.1);
+    outline: 2px solid #fff;
+    outline-offset: 4px;
 }
 
 .social-link svg {
@@ -235,13 +238,15 @@ body {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.6s;
     transform: scale(1.1);
 }
 
 .nav-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
     transform: scale(1);
 }
@@ -265,9 +270,12 @@ body {
     display: block;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link:focus-visible {
     opacity: 1;
     letter-spacing: 4px;
+    outline: none;
+    text-decoration: underline;
 }
 
 .menu-inquiry-btn {
@@ -285,9 +293,12 @@ body {
     border-radius: 100px;
 }
 
-.menu-inquiry-btn:hover {
+.menu-inquiry-btn:hover,
+.menu-inquiry-btn:focus-visible {
     opacity: 1;
     background: rgba(255, 255, 255, 0.05);
+    outline: 2px solid #fff;
+    outline-offset: 4px;
 }
 
 @media (min-width: 768px) {
@@ -462,7 +473,8 @@ body {
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
 }
 
-.enter-btn-pill:hover::before {
+.enter-btn-pill:hover::before,
+.enter-btn-pill:focus-visible::before {
     transform: translateY(0);
 }
 
@@ -564,10 +576,17 @@ body {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     }
 
-    .gallery-item:hover .gallery-item-inner {
+    .gallery-item:hover .gallery-item-inner,
+    .gallery-item:focus-visible .gallery-item-inner {
         transform: scale(1.08) translateY(-10px);
         filter: brightness(1.1) grayscale(0);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .gallery-item:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 4px;
+        z-index: 10;
     }
 }
 
@@ -635,12 +654,14 @@ body {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: opacity 0.6s cubic-bezier(0.19, 1, 0.22, 1), visibility 0.6s;
 }
 
 .lightbox.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
 }
 
@@ -750,14 +771,16 @@ body {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: transform 1s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.8s ease;
+    transition: transform 1s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.8s ease, visibility 0.8s;
     transform: scale(1.1) translateY(20px);
     padding: 2rem;
 }
 
 .services-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
     transform: scale(1) translateY(0);
 }
