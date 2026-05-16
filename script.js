@@ -188,8 +188,17 @@ for (let c = 0; c < cols; c++) {
 
         // Store click handler index in the element itself for dynamic updates
         el.dataset.sourceIdx = sourceIdx;
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View ${source.name}`);
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -266,9 +275,15 @@ function render() {
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
 
         if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
+            if (item.el.style.visibility !== 'hidden') {
+                item.el.style.visibility = 'hidden';
+                item.el.tabIndex = -1;
+            }
         } else {
-            item.el.style.visibility = 'visible';
+            if (item.el.style.visibility !== 'visible') {
+                item.el.style.visibility = 'visible';
+                item.el.tabIndex = 0;
+            }
             item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         }
     });
@@ -344,20 +359,29 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
     lbCaption.innerText = imageSources[currentLbIndex].name;
+    // Update alt for screen readers to match caption
+    lbImg.alt = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -377,6 +401,21 @@ document.getElementById('lightbox-next').addEventListener('click', (e) => {
 lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox || e.target.id === 'lightbox-content') {
         closeLightbox();
+    }
+});
+
+// Lightbox Keyboard Navigation
+window.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+
+    if (e.key === 'Escape') {
+        closeLightbox();
+    } else if (e.key === 'ArrowLeft') {
+        currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+        updateLightbox();
+    } else if (e.key === 'ArrowRight') {
+        currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+        updateLightbox();
     }
 });
 
