@@ -162,16 +162,18 @@ const gridMatrix = gridPatterns[0]; // Use first pattern for initial render
 
 for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
+        const sourceIdx = gridMatrix[c][r];
+        const source = imageSources[sourceIdx];
+
         const el = document.createElement('div');
         el.className = 'gallery-item';
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `View ${source.name}`);
         el.style.width = itemActualW + 'px';
         el.style.height = itemActualH + 'px';
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
-
-        const sourceIdx = gridMatrix[c][r];
-        const source = imageSources[sourceIdx];
-
         const img = document.createElement('img');
         img.src = source.src;
         img.loading = "lazy";
@@ -190,6 +192,12 @@ for (let c = 0; c < cols; c++) {
         el.dataset.sourceIdx = sourceIdx;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === ' ') e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -240,6 +248,7 @@ function updateGridPatternIfNeeded() {
                 if (img) img.src = newSource.src;
                 if (title) title.innerText = newSource.name;
                 item.el.dataset.sourceIdx = newSourceIdx;
+                item.el.setAttribute('aria-label', `View ${newSource.name}`);
             }
         });
     }
@@ -265,12 +274,10 @@ function render() {
         const x = wrap(item.initialX + currentX, -totalW / 2, totalW / 2);
         const y = wrap(item.initialY + currentY, -totalH / 2, totalH / 2);
 
-        if (x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin) {
-            item.el.style.visibility = 'hidden';
-        } else {
-            item.el.style.visibility = 'visible';
-            item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        }
+        const isHidden = x < -itemW - margin || x > winW + margin || y < -itemH - margin || y > winH + margin;
+        item.el.style.visibility = isHidden ? 'hidden' : 'visible';
+        item.el.tabIndex = isHidden ? -1 : 0;
+        if (!isHidden) item.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     });
 }
 
@@ -344,21 +351,36 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
+let lastFocusedElement = null;
 
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    // Allow focus to move to the lightbox for keyboard navigation
+    setTimeout(() => {
+        document.getElementById('lightbox-close').focus();
+    }, 100);
 }
 
 function updateLightbox() {
     lbImg.src = imageSources[currentLbIndex].src;
+    lbImg.alt = imageSources[currentLbIndex].name;
     lbCaption.innerText = imageSources[currentLbIndex].name;
 }
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    lastFocusedElement?.focus();
 }
+
+window.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') { currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length; updateLightbox(); }
+    if (e.key === 'ArrowRight') { currentLbIndex = (currentLbIndex + 1) % imageSources.length; updateLightbox(); }
+});
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
 
