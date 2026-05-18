@@ -166,6 +166,10 @@ for (let c = 0; c < cols; c++) {
         el.className = 'gallery-item';
         el.style.width = itemActualW + 'px';
         el.style.height = itemActualH + 'px';
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', 'View photo');
+
         const inner = document.createElement('div');
         inner.className = 'gallery-item-inner';
 
@@ -190,6 +194,12 @@ for (let c = 0; c < cols; c++) {
         el.dataset.sourceIdx = sourceIdx;
         el.addEventListener('click', () => { 
             if (!wasDragged) openLightbox(parseInt(el.dataset.sourceIdx)); 
+        });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openLightbox(parseInt(el.dataset.sourceIdx));
+            }
         });
 
         items.push({
@@ -345,10 +355,14 @@ const lbImg = document.getElementById('lightbox-img');
 const lbCaption = document.getElementById('lightbox-caption');
 let currentLbIndex = 0;
 
+let lastFocusedElement;
+
 function openLightbox(index) {
+    lastFocusedElement = document.activeElement;
     currentLbIndex = index;
     updateLightbox();
     lightbox.classList.add('active');
+    lightbox.focus();
 }
 
 function updateLightbox() {
@@ -358,6 +372,10 @@ function updateLightbox() {
 
 function closeLightbox() {
     lightbox.classList.remove('active');
+    if (lastFocusedElement) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
@@ -372,6 +390,19 @@ document.getElementById('lightbox-next').addEventListener('click', (e) => {
     e.stopPropagation();
     currentLbIndex = (currentLbIndex + 1) % imageSources.length;
     updateLightbox();
+});
+
+window.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') {
+        currentLbIndex = (currentLbIndex - 1 + imageSources.length) % imageSources.length;
+        updateLightbox();
+    }
+    if (e.key === 'ArrowRight') {
+        currentLbIndex = (currentLbIndex + 1) % imageSources.length;
+        updateLightbox();
+    }
 });
 
 lightbox.addEventListener('click', (e) => {

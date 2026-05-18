@@ -572,8 +572,15 @@ body {
 }
 
 /* On mobile, tapping brightens it up natively via active state or we just leave it dark and brighten in focus */
-.gallery-item:active .gallery-item-inner {
+.gallery-item:active .gallery-item-inner,
+.gallery-item:focus-visible .gallery-item-inner {
     filter: brightness(1) grayscale(0);
+}
+
+.gallery-item:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+    border-radius: 8px;
 }
 
 .gallery-item-inner img {
@@ -622,6 +629,7 @@ body {
 
 /* ── LIGHTBOX ── */
 .lightbox {
+    outline: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -685,8 +693,11 @@ body {
     z-index: 201;
 }
 
-.lightbox-btn:hover {
+.lightbox-btn:hover,
+.lightbox-btn:focus-visible {
     opacity: 1;
+    outline: 2px solid #fff;
+    outline-offset: 4px;
 }
 
 .lightbox-prev {
@@ -712,8 +723,11 @@ body {
     line-height: 1;
 }
 
-.lightbox-close:hover {
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
     opacity: 1;
+    outline: 2px solid #fff;
+    outline-offset: 4px;
 }
 
 @media (max-width: 768px) {
